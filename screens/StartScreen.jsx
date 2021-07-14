@@ -7,6 +7,9 @@ import SignScreen from './SignScreen'
 import ConfirmNumberScreen from './ConfirmNumberScreen'
 import HomeScreen from './HomeScreen'
 import Loading from '../components/Loading'
+import PromoScreen from './PromoScreen'
+import ProfileScreen from './ProfileScreen'
+import InstructionScreen from './InstructionScreen'
 
 const Stack = createStackNavigator()
 
@@ -49,6 +52,33 @@ const StartScreen = () => {
                             headerShown: false,
                             animationEnabled: false
                         }} 
+                    />
+                    <Stack.Screen 
+                        name="Promo" 
+                        component={PromoScreen} 
+                        options={{
+                            title: 'Промо',
+                            headerBackTitleVisible: false,
+                            headerTitleStyle: {
+                                opacity: 0
+                            }
+                        }}
+                    />
+                    <Stack.Screen 
+                        name="Profile" 
+                        component={ProfileScreen} 
+                        options={{
+                            title: 'Аккаунт',
+                            headerBackTitleVisible: false,
+                        }}
+                    />
+                    <Stack.Screen
+                        options={{ 
+                            headerShown: false,
+                            animationEnabled: false
+                        }}
+                        name="Instruction" 
+                        component={InstructionScreen} 
                     />
                 </Stack.Navigator>
             </NavigationContainer>

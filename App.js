@@ -31,7 +31,8 @@ export default function App() {
     const context = {
         windowWidth,
         windowHeight,
-        COLORS: lightTheme
+        COLORS: lightTheme,
+        PADDING_HORIZONTAL: 15
     }
 
     if(!fontsLoaded) {
