@@ -1,14 +1,18 @@
-import React, { useContext, useState, useRef } from 'react'
-import { SafeAreaView, Text, TouchableOpacity, TouchableWithoutFeedback, View, Platform, UIManager, LayoutAnimation, Animated, PanResponder } from 'react-native'
+import React, { useContext, useState, useRef, useEffect } from 'react'
+import { Alert, SafeAreaView, Text, TouchableOpacity, TouchableWithoutFeedback, View, Platform, UIManager, LayoutAnimation, Animated, PanResponder } from 'react-native'
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
 import Svg, { Path, Mask, Rect } from 'react-native-svg'
-
+import * as Location from 'expo-location'
+import { useDispatch, useSelector } from 'react-redux'
 
 import { Context } from '../assets/context'
+import { SET_PERMITIONS } from '../redux/reducers/settingsReducer'
 
 if(Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true)
 }
+
+
 
 
 const MapScreen = ({ navigation }) => {
@@ -16,8 +20,44 @@ const MapScreen = ({ navigation }) => {
 
     const {windowWidth, windowHeight, COLORS, PADDING_HORIZONTAL} = useContext(Context)
 
-    // const [menu, setMenu] = useState(false)
+    const dispatch = useDispatch()
+    const location = useSelector(state => state.settings.location)
 
+    const getRequestPermitions = async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync()
+
+        dispatch({type: SET_PERMITIONS, payload: status})
+    }
+
+    const getCurrentLocation = async (location) => {
+    
+        if (location.status !== 'granted') {
+            Alert.alert(
+                "Нет доступа к геолокации",
+                'Для использования приложения, необходиморазрешение на постоянное использование геопозиции. Измините это разрешение в настройках телефона.',
+                [
+                    {
+                        text: "Cancel",
+                        style: 'cancel',
+                    },
+                ]
+            )
+
+            return false
+        }
+    
+        // let location = await Location.getCurrentPositionAsync({})
+    
+        // console.log(JSON.stringify(location))
+    }
+  
+    useEffect(() => {
+        // getRequestPermitions()
+
+        // if(location.status === 'granted') {
+        //     getCurrentLocation(location)
+        // }
+    }, [])
 
     return (
         <SafeAreaView
