@@ -1,3 +1,6 @@
+const mongoose = require('mongoose')
+const { Schema } = mongoose
+
 const User = require('../mongo/models/User')
 const UserData = require('../mongo/models/UserData')
 const bcrypt = require('bcrypt')
@@ -15,6 +18,20 @@ const generateAccessToken = (id) => {
     const payload = {id}
     return jwt.sign(payload, secretKey, {expiresIn: '24h'})
 }
+
+
+const scooterSchema = new Schema({
+    scooterId:  Number, 
+    location: {
+        latitude: Number,
+        longitude: Number,
+    },
+    charge: Number,
+    active: Boolean,
+    breakdown: Boolean
+  });
+
+  const ScooterModel = mongoose.model('scooters', scooterSchema)
 
 class authController {
     async login(req, res) {
@@ -47,6 +64,32 @@ class authController {
             res.status(400).json({message: 'Login error'})
         }
     }
+
+    // async addScooter(req, res) {
+    //     const getRandomIntInclusive = (min, max) => {
+    //         min = Math.ceil(min);
+    //         max = Math.floor(max);
+    //         return Math.floor(Math.random() * (max - min + 1)) + min; 
+    //     }
+    
+    //     const getRandomIntInclusive2 = (min, max) => {
+    //         return Math.random() * (max - min) + min; 
+    //     }
+    
+    //     for(let i = 0; i < 60; i++) {
+    //         let scooter = new ScooterModel({
+    //             scooterId: getRandomIntInclusive(100000, 999999),
+    //             location: {
+    //                 latitude: getRandomIntInclusive2(53.832952424813264, 53.96976226289491),
+    //                 longitude: getRandomIntInclusive2(27.407319029893802, 27.68970102456448),
+    //             },
+    //             charge: getRandomIntInclusive(0, 100),
+    //             active: Math.random() > 0.8,
+    //             breakdown: Math.random() < 0.1,
+    //         })
+    //         await scooter.save()
+    //     }
+    // }
 }
 
 module.exports = new authController()

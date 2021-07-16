@@ -6,5 +6,6 @@ const authMiddleware = require('./middleware/auth.middleware')
 
 
 router.post('/login', controller.login)
+// router.post('/addScooter', controller.addScooter)
 
 module.exports = router

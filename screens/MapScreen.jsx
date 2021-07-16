@@ -1,12 +1,12 @@
 import React, { useContext, useState, useRef, useEffect } from 'react'
-import { Alert, SafeAreaView, Text, TouchableOpacity, TouchableWithoutFeedback, View, Platform, UIManager, LayoutAnimation, Animated, PanResponder } from 'react-native'
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
+import { Alert, Image, SafeAreaView, Text, TouchableOpacity, TouchableWithoutFeedback, View, Platform, UIManager, LayoutAnimation, Animated, PanResponder } from 'react-native'
+import MapView, { PROVIDER_GOOGLE, Marker, HeatMap } from 'react-native-maps'
 import Svg, { Path, Mask, Rect } from 'react-native-svg'
 import * as Location from 'expo-location'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Context } from '../assets/context'
-import { SET_PERMITIONS } from '../redux/reducers/settingsReducer'
+import { SET_PERMITIONS, SET_LOCATION, LOADING } from '../redux/reducers/settingsReducer'
 
 if(Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true)
@@ -16,22 +16,42 @@ if(Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental)
 
 
 const MapScreen = ({ navigation }) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
-
+    // LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     const {windowWidth, windowHeight, COLORS, PADDING_HORIZONTAL} = useContext(Context)
+
+
+    const [selectedScooter, setSelectedScooter] = useState(null)
+
+    let chargeColor
+
+    if(selectedScooter !== null) {
+        if(selectedScooter.charge >= 50) {
+            chargeColor = COLORS.green
+        } else if(selectedScooter.charge > 29 && selectedScooter.charge < 49 ) {
+            chargeColor = COLORS.orange
+        } else {
+            chargeColor = COLORS.red
+        }
+    }
+
+   
+
+    const mapRef = useRef(null)
+
 
     const dispatch = useDispatch()
     const location = useSelector(state => state.settings.location)
 
+    const locationStatus = location.status === 'granted' ? COLORS.first : COLORS.firstDisabled
+
     const getRequestPermitions = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync()
-
         dispatch({type: SET_PERMITIONS, payload: status})
+        return status
     }
 
-    const getCurrentLocation = async (location) => {
-    
-        if (location.status !== 'granted') {
+    const getCurrentLocation = async (status) => {
+        if (status !== 'granted') {
             Alert.alert(
                 "Нет доступа к геолокации",
                 'Для использования приложения, необходиморазрешение на постоянное использование геопозиции. Измините это разрешение в настройках телефона.',
@@ -45,19 +65,86 @@ const MapScreen = ({ navigation }) => {
 
             return false
         }
-    
-        // let location = await Location.getCurrentPositionAsync({})
-    
-        // console.log(JSON.stringify(location))
+
+        dispatch({ type: LOADING, payload: true })
+
+        let currentLocation = await Location.getLastKnownPositionAsync({})
+
+        dispatch({ type: SET_LOCATION, payload: currentLocation.coords })
+        dispatch({ type: LOADING, payload: false })
+
+        return true
     }
+
+    const onCurrentPos = () => {
+        getCurrentLocation(location.status)
+        .then((data) => {
+            console.log
+            if(!data) {
+                return false
+            }
+
+            mapRef.current.animateCamera({
+                center: {
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                },
+                zoom: 15.2
+            }, {duration: 300})
+        })
+    }
+
   
     useEffect(() => {
-        // getRequestPermitions()
-
-        // if(location.status === 'granted') {
-        //     getCurrentLocation(location)
-        // }
+        getRequestPermitions()
+        .then((status) => {
+            if(status === 'granted') {
+                getCurrentLocation(status)
+            }
+        })
     }, [])
+
+
+    let scooterData = []
+
+
+    const getRandomIntInclusive = (min, max) => {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min; 
+    }
+
+    const getRandomIntInclusive2 = (min, max) => {
+        return Math.random() * (max - min) + min; 
+    }
+
+    const a = () => {
+        for(let i = 0; i < 30; i++) {
+            let scooter = {
+                scooterId: getRandomIntInclusive(100000, 999999),
+                location: {
+                    latitude: getRandomIntInclusive2(53.832952424813264, 53.96976226289491),
+                    longitude: getRandomIntInclusive2(27.407319029893802, 27.68970102456448),
+                },
+                charge: getRandomIntInclusive(0, 100),
+                active: Math.random() > 0.8,
+                breakdown: Math.random() < 0.1,
+            }
+            scooterData.push(scooter)
+        }
+    }
+    a()
+
+    // console.log(selectedScooter)
+
+    const onMapPress = (target) => {
+        if(target.action && target.action === 'marker-press') {
+            return false
+        } else {
+            setSelectedScooter(null)
+        }
+    }
+
 
     return (
         <SafeAreaView
@@ -67,13 +154,18 @@ const MapScreen = ({ navigation }) => {
             }}
         >
             <MapView
+                onPress={e => onMapPress(e.nativeEvent)}
+                ref={mapRef}
                 provider={PROVIDER_GOOGLE}
+                paddingAdjustmentBehavior="automatic"
                 initialRegion={{
-                    latitude: 37.78825,
-                    longitude: -122.4324,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    latitudeDelta: !location.position ? 0.2 : 0.015,
+                    longitudeDelta: !location.position ? 0.2 : 0.015,
                 }}
+                showsUserLocation={true}
+                followsUserLocation={true}
                 style={{
                     flex: 1,
                     position: 'absolute',
@@ -82,7 +174,47 @@ const MapScreen = ({ navigation }) => {
                     width: windowWidth,
                     height: windowHeight,
                 }}
-            />
+            >
+                {scooterData.length !== 0 && 
+                    scooterData.map(scooter => {
+
+                        if(scooter.active || scooter.breakdown) {
+                            return false
+                        }
+
+                        const charge = () => {
+                            let charge = ''
+
+                            if(scooter.charge >= 50) {
+                                charge = require(`../assets/icons/marker-green.png`)
+                            } else if(scooter.charge > 29 && scooter.charge < 49 ) {
+                                charge = require(`../assets/icons/marker-orange.png`)
+                            } else {
+                                charge = require(`../assets/icons/marker-red.png`)
+                            }
+                            return charge
+                        }
+
+                        return (
+                            <Marker 
+                                onPress={() => setSelectedScooter(scooter)}
+                                key={scooter.scooterId.toString()}
+                                coordinate={{
+                                    latitude: scooter.location.latitude,
+                                    longitude: scooter.location.longitude
+                                }}
+                            >
+                                <Image 
+                                    style={{
+                                        width: 35,
+                                        height: 46
+                                    }} 
+                                    source={charge()} />
+                            </Marker>
+                        )
+                    })
+                }
+            </MapView>
             <View
                 style={{
                     width: windowWidth,
@@ -134,53 +266,245 @@ const MapScreen = ({ navigation }) => {
                     </View>
                 </TouchableWithoutFeedback>
             </View>
-            <TouchableWithoutFeedback
-                onPress={() => navigation.navigate('Instruction')}
-            >
-                <View
-                    style={{
-                        width: windowWidth - PADDING_HORIZONTAL * 2,
-                        height: 80,
-                        backgroundColor: COLORS.bgWhite,
-                        marginTop: 15,
-                        borderRadius: 10,
-                        overflow: 'hidden',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        ...COLORS.buttonShadow
-                    }}
+            {location.status === 'granted' &&
+                <TouchableWithoutFeedback
+                    onPress={() => navigation.navigate('Instruction')}
                 >
                     <View
                         style={{
-                            width: 75,
-                            height: 75,
-                            borderRadius: 50, 
-                            backgroundColor: COLORS.orange,
-                            transform: [
-                                {translateX: -25},
-                                {translateY: -15},
-                            ]
+                            width: windowWidth - PADDING_HORIZONTAL * 2,
+                            height: 80,
+                            backgroundColor: COLORS.bgWhite,
+                            marginTop: 15,
+                            borderRadius: 10,
+                            overflow: 'hidden',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            ...COLORS.buttonShadow
                         }}
-                    ></View>
-                    <View>
-                        <Text
+                    >
+                        <View
                             style={{
-                                fontFamily: 'Roboto_700',
-                                fontSize: 16,
-                                color: COLORS.first,
-                                marginTop: -6
+                                width: 75,
+                                height: 75,
+                                borderRadius: 50, 
+                                backgroundColor: COLORS.orange,
+                                transform: [
+                                    {translateX: -25},
+                                    {translateY: -15},
+                                ]
                             }}
-                        >Как кататься?</Text>
-                        <Text
-                            style={{
-                                fontFamily: 'Roboto_400',
-                                color: COLORS.firstLight,
-                                marginTop: 15
-                            }}
-                        >Нажмите, чтобы увидеть инструкцию</Text>
+                        >
+                            <Image 
+                                style={{
+                                    position: 'absolute',
+                                    right: 5,
+                                    bottom: 5,
+                                    width: 55,
+                                    height: 55
+                                }}
+                                source={require('../assets/icons/scooter.png')}
+                            />
+                        </View>
+                        <View>
+                            <Text
+                                style={{
+                                    fontFamily: 'Roboto_700',
+                                    fontSize: 16,
+                                    color: COLORS.first,
+                                    marginTop: -6
+                                }}
+                            >Как кататься?</Text>
+                            <Text
+                                style={{
+                                    fontFamily: 'Roboto_400',
+                                    color: COLORS.firstLight,
+                                    marginTop: 15
+                                }}
+                            >Нажмите, чтобы увидеть инструкцию</Text>
+                        </View>
                     </View>
+                </TouchableWithoutFeedback>
+            }
+            {selectedScooter !== null &&
+                <View>
+                    <View
+                        style={{
+                            width: windowWidth - PADDING_HORIZONTAL * 2,
+                            height: 90,
+                            backgroundColor: COLORS.bgWhite,
+                            marginTop: 15,
+                            borderRadius: 10,
+                            overflow: 'hidden',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            ...COLORS.buttonShadow
+                        }}
+                    >
+                        <View
+                            style={{
+                                width: 80,
+                                height: 80,
+                                borderRadius: 50, 
+                                backgroundColor: COLORS.orange,
+                                transform: [
+                                    {translateX: -25},
+                                    {translateY: -15},
+                                ]
+                            }}
+                        >
+                            <Image 
+                                style={{
+                                    position: 'absolute',
+                                    right: 5,
+                                    bottom: 5,
+                                    width: 55,
+                                    height: 55
+                                }}
+                                source={require('../assets/icons/scooter.png')}
+                            />
+                        </View>
+                        <View
+                            style={{
+                                marginLeft: -5
+                            }}
+                        >
+                            <View
+                                style={{
+                                    fontSize: 16,
+                                    color: COLORS.first,
+                                    marginTop: -6,
+                                    flexDirection: 'row',
+                                    alignItems: 'center'
+
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        fontFamily: 'Roboto_500',
+                                        fontSize: 16,
+                                        color: COLORS.first
+                                    }}
+                                >Самокат </Text> 
+                                <Text
+                                    style={{
+                                        fontFamily: 'Roboto_500',
+                                        fontSize: 16,
+                                        color: COLORS.first
+                                    }}
+                                > XX{selectedScooter.scooterId.toString().slice(2)}</Text>
+                                <View
+                                    style={{
+                                        marginLeft: 15,
+                                    }}
+                                >
+                                    <View
+                                        style={{
+                                            position: 'absolute',
+                                            top: -2,
+                                            width: 3,
+                                            height: 3,
+                                            left: 3,
+                                            backgroundColor: '#d2d2d2'
+                                        }}
+                                    ></View>
+                                    <View
+                                        style={{
+                                            width: 9,
+                                            height: 15,
+                                            backgroundColor: '#d2d2d2',
+                                            overflow: 'hidden'
+                                        }}
+                                    >
+                                        <View
+                                            style={{
+                                                position: 'absolute',
+                                                top: 15 - (15 / 100 * selectedScooter.charge),
+                                                height: 15,
+                                                left: 0,
+                                                right: 0,
+                                                backgroundColor: chargeColor
+                                            }}
+                                        ></View>
+                                    </View>
+                                </View>
+                                <Text
+                                    style={{
+                                        fontFamily: 'Roboto_500',
+                                        color: chargeColor,
+                                        fontSize: 16
+                                    }}
+                                >  {selectedScooter.charge}%</Text>
+                            </View>
+                            <View
+                                style={{
+                                    marginBottom: 15,
+                                    marginTop: 7,
+                                    flexDirection: 'row'
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        fontFamily: 'Roboto_400',
+                                        color: COLORS.firstLight,
+                                        fontSize: 15
+                                    }}
+                                >Старт: 1,4</Text>
+                                <Text 
+                                    style={{
+                                        fontFamily: 'Roboto_400',
+                                        color: COLORS.firstLight,
+                                        marginLeft: 20,
+                                        fontSize: 15,
+                                    }}
+                                >1 минута: 0,21 BYN</Text>
+                            </View>
+                        </View>
+                    </View>
+                    <View
+                            style={{
+                                position: 'absolute',
+                                bottom: -20,
+                                left: (windowWidth - PADDING_HORIZONTAL * 2) / 2 -80,
+                                width: 160,
+                                height: 40,
+                                backgroundColor: '#fff',
+                                borderRadius: 50,
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                paddingHorizontal: 15,
+                                ...COLORS.buttonShadow,
+                                shadowOpacity: 0.25,
+                            }}
+                        >
+                            <TouchableWithoutFeedback>
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <Svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <Mask id="path-1-inside-1" fill="white">
+                                        <Path d="M12 4.5V12.9375H17.625"/>
+                                        </Mask>
+                                        <Path d="M12 12.9375H10.5V14.4375H12V12.9375ZM10.5 4.5V12.9375H13.5V4.5H10.5ZM12 14.4375H17.625V11.4375H12V14.4375Z" fill="black" mask="url(#path-1-inside-1)"/>
+                                        <Path d="M1.75 12C1.75 6.34135 6.34135 1.75 12 1.75C17.6587 1.75 22.25 6.34135 22.25 12C22.25 17.6587 17.6587 22.25 12 22.25C6.34135 22.25 1.75 17.6587 1.75 12Z" stroke="black" stroke-width="2"/>
+                                    </Svg>
+
+                                    <Text
+                                        style={{
+                                            color: COLORS.first,
+                                            fontFamily: 'Roboto_500',
+                                            marginLeft: 10
+                                        }}
+                                    >Забронировать</Text>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </View>
                 </View>
-            </TouchableWithoutFeedback>
+            }
             <View
                 style={{
                     width: windowWidth,
@@ -191,7 +515,9 @@ const MapScreen = ({ navigation }) => {
                     justifyContent: 'space-between'
                 }}
             >
-                <TouchableWithoutFeedback>
+                <TouchableWithoutFeedback
+                    onPress={onCurrentPos}
+                >
                     <View
                         style={{
                             width: 40,
@@ -206,7 +532,9 @@ const MapScreen = ({ navigation }) => {
                         <Svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><Path fill={COLORS.first} d="M500 8h-27.711c-6.739 0-12.157 5.548-11.997 12.286l2.347 98.568C418.075 51.834 341.788 7.73 255.207 8.001 118.82 8.428 7.787 120.009 8 256.396 8.214 393.181 119.165 504 256 504c63.926 0 122.202-24.187 166.178-63.908 5.113-4.618 5.354-12.561.482-17.433l-19.738-19.738c-4.498-4.498-11.753-4.785-16.501-.552C351.787 433.246 306.105 452 256 452c-108.322 0-196-87.662-196-196 0-108.322 87.662-196 196-196 79.545 0 147.941 47.282 178.675 115.302l-126.389-3.009c-6.737-.16-12.286 5.257-12.286 11.997V212c0 6.627 5.373 12 12 12h192c6.627 0 12-5.373 12-12V20c0-6.627-5.373-12-12-12z"></Path></Svg>
                     </View>
                 </TouchableWithoutFeedback>
-                <TouchableWithoutFeedback>
+                <TouchableWithoutFeedback
+                    disabled={location.status === 'granted' ? false : true}
+                >
                     <View
                         style={{
                             height: 40,
@@ -219,16 +547,19 @@ const MapScreen = ({ navigation }) => {
                             ...COLORS.buttonShadow
                         }}
                     >
-                        <Svg width="25" height="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><Path fill={COLORS.first} d="M480 256c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96zm0-160c35.3 0 64 28.7 64 64s-28.7 64-64 64-64-28.7-64-64 28.7-64 64-64zM192 256c61.9 0 112-50.1 112-112S253.9 32 192 32 80 82.1 80 144s50.1 112 112 112zm0-192c44.1 0 80 35.9 80 80s-35.9 80-80 80-80-35.9-80-80 35.9-80 80-80zm80.1 212c-33.4 0-41.7 12-80.1 12-38.4 0-46.7-12-80.1-12-36.3 0-71.6 16.2-92.3 46.9C7.2 341.3 0 363.4 0 387.2V432c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48v-44.8c0-23.8-7.2-45.9-19.6-64.3-20.7-30.7-56-46.9-92.3-46.9zM352 432c0 8.8-7.2 16-16 16H48c-8.8 0-16-7.2-16-16v-44.8c0-16.6 4.9-32.7 14.1-46.4 13.8-20.5 38.4-32.8 65.7-32.8 27.4 0 37.2 12 80.2 12s52.8-12 80.1-12c27.3 0 51.9 12.3 65.7 32.8 9.2 13.7 14.1 29.8 14.1 46.4V432zm271.7-114.9C606.4 291.5 577 278 546.8 278c-27.8 0-34.8 10-66.8 10s-39-10-66.8-10c-13.2 0-26.1 3-38.1 8.1 15.2 15.4 18.5 23.6 20.2 26.6 5.7-1.6 11.6-2.6 17.9-2.6 21.8 0 30 10 66.8 10s45-10 66.8-10c21 0 39.8 9.3 50.4 25 7.1 10.5 10.9 22.9 10.9 35.7V408c0 4.4-3.6 8-8 8H416c0 17.7.3 22.5-1.6 32H600c22.1 0 40-17.9 40-40v-37.3c0-19.9-6-38.3-16.3-53.6z"></Path></Svg>                        
+                        <Svg width="25" height="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><Path fill={locationStatus} d="M480 256c53 0 96-43 96-96s-43-96-96-96-96 43-96 96 43 96 96 96zm0-160c35.3 0 64 28.7 64 64s-28.7 64-64 64-64-28.7-64-64 28.7-64 64-64zM192 256c61.9 0 112-50.1 112-112S253.9 32 192 32 80 82.1 80 144s50.1 112 112 112zm0-192c44.1 0 80 35.9 80 80s-35.9 80-80 80-80-35.9-80-80 35.9-80 80-80zm80.1 212c-33.4 0-41.7 12-80.1 12-38.4 0-46.7-12-80.1-12-36.3 0-71.6 16.2-92.3 46.9C7.2 341.3 0 363.4 0 387.2V432c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48v-44.8c0-23.8-7.2-45.9-19.6-64.3-20.7-30.7-56-46.9-92.3-46.9zM352 432c0 8.8-7.2 16-16 16H48c-8.8 0-16-7.2-16-16v-44.8c0-16.6 4.9-32.7 14.1-46.4 13.8-20.5 38.4-32.8 65.7-32.8 27.4 0 37.2 12 80.2 12s52.8-12 80.1-12c27.3 0 51.9 12.3 65.7 32.8 9.2 13.7 14.1 29.8 14.1 46.4V432zm271.7-114.9C606.4 291.5 577 278 546.8 278c-27.8 0-34.8 10-66.8 10s-39-10-66.8-10c-13.2 0-26.1 3-38.1 8.1 15.2 15.4 18.5 23.6 20.2 26.6 5.7-1.6 11.6-2.6 17.9-2.6 21.8 0 30 10 66.8 10s45-10 66.8-10c21 0 39.8 9.3 50.4 25 7.1 10.5 10.9 22.9 10.9 35.7V408c0 4.4-3.6 8-8 8H416c0 17.7.3 22.5-1.6 32H600c22.1 0 40-17.9 40-40v-37.3c0-19.9-6-38.3-16.3-53.6z"></Path></Svg>                        
                         <Text
                             style={{
                                 marginLeft: 10,
                                 fontFamily: 'Roboto_500',
+                                color: locationStatus
                             }}
                         >Групповая поездка</Text>
                     </View>
                 </TouchableWithoutFeedback>
-                <TouchableWithoutFeedback>
+                <TouchableWithoutFeedback
+                    onPress={onCurrentPos}
+                >
                     <View
                         style={{
                             width: 40,
@@ -254,6 +585,7 @@ const MapScreen = ({ navigation }) => {
                 }}
             >
                 <TouchableOpacity
+                    disabled={location.status === 'granted' ? false : true}
                     activeOpacity={0.7}
                     style={{
                         height: 48,
@@ -261,12 +593,23 @@ const MapScreen = ({ navigation }) => {
                         alignItems: 'center',
                     }}
                 >
-                    <Svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512"><Rect fill={COLORS.first} x="336" y="336" width="80" height="80" rx="8" ry="8"/><Rect fill={COLORS.first} x="272" y="272" width="64" height="64" rx="8" ry="8"/><Rect fill={COLORS.first} x="416" y="416" width="64" height="64" rx="8" ry="8"/><Rect fill={COLORS.first} x="432" y="272" width="48" height="48" rx="8" ry="8"/><Rect fill={COLORS.first} x="272" y="432" width="48" height="48" rx="8" ry="8"/><Rect fill={COLORS.first} x="336" y="96" width="80" height="80" rx="8" ry="8"/><Rect fill={COLORS.first} x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="#000" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32"/><Rect fill={COLORS.first} x="96" y="96" width="80" height="80" rx="8" ry="8"/><Rect fill={COLORS.first} x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke="#000" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" /><Rect fill={COLORS.first} x="96" y="336" width="80" height="80" rx="8" ry="8"/><Rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke="#000" strokeLinecap="round" strokeLinejoin="round" strokeWidth="32"/></Svg>
-                    <Text
+                    <Svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
+                        <Rect fill={locationStatus} x="336" y="336" width="80" height="80" rx="8" ry="8"/>
+                        <Rect fill={locationStatus} x="272" y="272" width="64" height="64" rx="8" ry="8"/>
+                        <Rect fill={locationStatus} x="416" y="416" width="64" height="64" rx="8" ry="8"/>
+                        <Rect fill={locationStatus} x="432" y="272" width="48" height="48" rx="8" ry="8"/>
+                        <Rect fill={locationStatus} x="272" y="432" width="48" height="48" rx="8" ry="8"/>
+                        <Rect fill={locationStatus} x="336" y="96" width="80" height="80" rx="8" ry="8"/>
+                        <Rect fill={locationStatus} x="288" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke={locationStatus} strokeLinecap="round" strokeLinejoin="round" strokeWidth="32"/>
+                        <Rect fill={locationStatus} x="96" y="96" width="80" height="80" rx="8" ry="8"/>
+                        <Rect fill={locationStatus} x="48" y="48" width="176" height="176" rx="16" ry="16" fill="none" stroke={locationStatus} strokeLinecap="round" strokeLinejoin="round" strokeWidth="32" />
+                        <Rect fill={locationStatus} x="96" y="336" width="80" height="80" rx="8" ry="8"/><Rect x="48" y="288" width="176" height="176" rx="16" ry="16" fill="none" stroke={locationStatus} strokeLinecap="round" strokeLinejoin="round" strokeWidth="32"/>
+                    </Svg>
+                    <Text 
                         style={{
                             fontFamily: 'Roboto_500',
                             fontSize: 16,
-                            color: COLORS.first,
+                            color: locationStatus,
                             marginLeft: 10
                         }}
                     >Сканировать QR-код</Text>
