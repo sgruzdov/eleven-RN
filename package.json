@@ -42,7 +42,8 @@
     "redux": "^4.1.0",
     "redux-devtools-extension": "^2.13.9",
     "redux-thunk": "^2.3.0",
-    "twilio": "^3.65.0"
+    "twilio": "^3.65.0",
+    "expo-camera": "~11.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0"

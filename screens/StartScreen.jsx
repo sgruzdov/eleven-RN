@@ -10,6 +10,7 @@ import Loading from '../components/Loading'
 import PromoScreen from './PromoScreen'
 import ProfileScreen from './ProfileScreen'
 import InstructionScreen from './InstructionScreen'
+import ScanQRScreen from './ScanQRScreen'
 
 const Stack = createStackNavigator()
 
@@ -79,6 +80,13 @@ const StartScreen = () => {
                         }}
                         name="Instruction" 
                         component={InstructionScreen} 
+                    />
+                    <Stack.Screen
+                        options={{ 
+                            headerShown: false,
+                        }}
+                        name="ScanQR" 
+                        component={ScanQRScreen} 
                     />
                 </Stack.Navigator>
             </NavigationContainer>

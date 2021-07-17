@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef, useEffect } from 'react'
-import { Alert, Image, SafeAreaView, Text, TouchableOpacity, TouchableWithoutFeedback, View, Platform, UIManager, LayoutAnimation, Animated, PanResponder } from 'react-native'
+import { Linking, Alert, Image, SafeAreaView, Text, TouchableOpacity, TouchableWithoutFeedback, View, Platform, UIManager, LayoutAnimation, Animated, PanResponder } from 'react-native'
 import MapView, { PROVIDER_GOOGLE, Marker, HeatMap } from 'react-native-maps'
 import Svg, { Path, Mask, Rect } from 'react-native-svg'
 import * as Location from 'expo-location'
@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { Context } from '../assets/context'
 import { SET_PERMITIONS, SET_LOCATION, LOADING } from '../redux/reducers/settingsReducer'
+import { getScootersThunk } from '../redux/reducers/scootersReducer'
 
 if(Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true)
@@ -18,7 +19,6 @@ if(Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental)
 const MapScreen = ({ navigation }) => {
     // LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     const {windowWidth, windowHeight, COLORS, PADDING_HORIZONTAL} = useContext(Context)
-
 
     const [selectedScooter, setSelectedScooter] = useState(null)
 
@@ -41,6 +41,7 @@ const MapScreen = ({ navigation }) => {
 
     const dispatch = useDispatch()
     const location = useSelector(state => state.settings.location)
+    const scooters = useSelector(state => state.scooters)
 
     const locationStatus = location.status === 'granted' ? COLORS.first : COLORS.firstDisabled
 
@@ -57,9 +58,13 @@ const MapScreen = ({ navigation }) => {
                 'Для использования приложения, необходиморазрешение на постоянное использование геопозиции. Измините это разрешение в настройках телефона.',
                 [
                     {
-                        text: "Cancel",
+                        text: "Отмена",
                         style: 'cancel',
                     },
+                    {
+                        text: 'Настройки',
+                        onPress: () => Linking.openSettings()
+                    }
                 ]
             )
 
@@ -77,65 +82,36 @@ const MapScreen = ({ navigation }) => {
     }
 
     const onCurrentPos = () => {
-        getCurrentLocation(location.status)
-        .then((data) => {
-            console.log
-            if(!data) {
-                return false
-            }
+        getRequestPermitions()
+        .then((status) => {
+                getCurrentLocation(status)
+                .then((data) => {
+                    console.log
+                    if(!data) {
+                        return false
+                    }
 
-            mapRef.current.animateCamera({
-                center: {
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                },
-                zoom: 15.2
-            }, {duration: 300})
+                    mapRef.current.animateCamera({
+                        center: {
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                        },
+                        zoom: 15.2
+                    }, {duration: 300})
+                })
         })
     }
 
-  
     useEffect(() => {
         getRequestPermitions()
         .then((status) => {
             if(status === 'granted') {
                 getCurrentLocation(status)
+                dispatch(getScootersThunk())
             }
         })
     }, [])
 
-
-    let scooterData = []
-
-
-    const getRandomIntInclusive = (min, max) => {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min; 
-    }
-
-    const getRandomIntInclusive2 = (min, max) => {
-        return Math.random() * (max - min) + min; 
-    }
-
-    const a = () => {
-        for(let i = 0; i < 30; i++) {
-            let scooter = {
-                scooterId: getRandomIntInclusive(100000, 999999),
-                location: {
-                    latitude: getRandomIntInclusive2(53.832952424813264, 53.96976226289491),
-                    longitude: getRandomIntInclusive2(27.407319029893802, 27.68970102456448),
-                },
-                charge: getRandomIntInclusive(0, 100),
-                active: Math.random() > 0.8,
-                breakdown: Math.random() < 0.1,
-            }
-            scooterData.push(scooter)
-        }
-    }
-    a()
-
-    // console.log(selectedScooter)
 
     const onMapPress = (target) => {
         if(target.action && target.action === 'marker-press') {
@@ -175,8 +151,8 @@ const MapScreen = ({ navigation }) => {
                     height: windowHeight,
                 }}
             >
-                {scooterData.length !== 0 && 
-                    scooterData.map(scooter => {
+                {scooters.data.length !== 0 && 
+                    scooters.data.map(scooter => {
 
                         if(scooter.active || scooter.breakdown) {
                             return false
@@ -449,7 +425,7 @@ const MapScreen = ({ navigation }) => {
                                         color: COLORS.firstLight,
                                         fontSize: 15
                                     }}
-                                >Старт: 1,4</Text>
+                                >Старт: 1,4 BYN</Text>
                                 <Text 
                                     style={{
                                         fontFamily: 'Roboto_400',
@@ -585,6 +561,7 @@ const MapScreen = ({ navigation }) => {
                 }}
             >
                 <TouchableOpacity
+                    onPress={() => navigation.navigate('ScanQR')}
                     disabled={location.status === 'granted' ? false : true}
                     activeOpacity={0.7}
                     style={{

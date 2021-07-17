@@ -8,7 +8,7 @@ export const CONFIRM_CODE = 'CONFIRM_CODE'
 export const REMOVE_ERRORS = 'REMOVE_ERRORS'
 export const ADD_ERROR = 'ADD_ERROR'
 
-const URL = 'http://localhost:3000'
+const {URL} = require('../../server/config')
 
 const inittialState = {
     auth: false,

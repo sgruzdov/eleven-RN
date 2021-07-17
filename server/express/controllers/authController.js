@@ -1,8 +1,3 @@
-const mongoose = require('mongoose')
-const { Schema } = mongoose
-
-const User = require('../mongo/models/User')
-const UserData = require('../mongo/models/UserData')
 const bcrypt = require('bcrypt')
 const { validationResult } = require('express-validator')
 const jwt = require('jsonwebtoken')
@@ -11,7 +6,7 @@ const accountSid = 'ACfeaaddf679306229e1c5d718d830df5e'
 const authToken = '65c52f1a6274311208c7b6a03147646e'
 const client = require('twilio')(accountSid, authToken)
 
-const { secretKey } = require('../config')
+const { secretKey } = require('../../config')
 
 
 const generateAccessToken = (id) => {
@@ -19,19 +14,6 @@ const generateAccessToken = (id) => {
     return jwt.sign(payload, secretKey, {expiresIn: '24h'})
 }
 
-
-const scooterSchema = new Schema({
-    scooterId:  Number, 
-    location: {
-        latitude: Number,
-        longitude: Number,
-    },
-    charge: Number,
-    active: Boolean,
-    breakdown: Boolean
-  });
-
-  const ScooterModel = mongoose.model('scooters', scooterSchema)
 
 class authController {
     async login(req, res) {

@@ -1,38 +1,44 @@
 import produce from 'immer'
 import * as axios from 'axios'
 
+import {URL} from '../../server/config'
+import { LOADING } from './settingsReducer'
+
+export const SET_SCOOTERS = 'SET_SCOOTERS'
+
 
 const inittialState = {
     data: [],
 }
 
-const getRandomIntInclusive = (min, max) => {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min; 
-}
+// const getRandomIntInclusive = (min, max) => {
+//     min = Math.ceil(min);
+//     max = Math.floor(max);
+//     return Math.floor(Math.random() * (max - min + 1)) + min; 
+// }
 
-export const authReducer = (state = inittialState, action) => {
+export const scootersReducer = (state = inittialState, action) => {
     switch(action.type) {
-
+        case SET_SCOOTERS:
+            return produce(state, draft => {
+                draft.data = action.payload
+            })
         default: 
             return state
     }
 }
 
-// export const authThunk = (code, number) => async dispatch => {
-//     dispatch({type: LOADING, payload: true})
-//     try {
+export const getScootersThunk = () => async dispatch => {
+    dispatch({type: LOADING, payload: true})
 
-//         const confirmCode = getRandomIntInclusive(100000, 999999)
-//         const res = await axios.post(`${URL}/auth/login`, {confirmCode})
+    try {
+        const {data} = await axios.get(`${URL}/scooter/getScooters`)
 
-//         dispatch({type: AUTH_CODE, payload: confirmCode})
+        dispatch({ type: SET_SCOOTERS, payload: data })
+    } catch(e) {
+        console.log('scooterReducer', e)
+    }
 
-//     } catch(errors) {
-//         console.log('AUTH', errors)
-//         dispatch({type: ADD_ERROR, payload: 2})
-//     }
+    dispatch({type: LOADING, payload: false})
 
-//     dispatch({type: LOADING, payload: false})
-// }
+}

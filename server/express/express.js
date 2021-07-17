@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoConnect = require('../mongo/mongo')
-const authRouter = require('./authRouter')
+const authRouter = require('./routes/authRouter')
+const scooterRouter = require('./routes/scooterRouter')
 const { PORT } = require('../config')
 const cors = require('cors')
 
@@ -11,6 +12,7 @@ app.use(cors())
 
 
 app.use("/auth", authRouter)
+app.use("/scooter", scooterRouter)
 
 
 
