@@ -3,14 +3,13 @@ import { Alert, Text, View, TextInput, TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { Context } from '../assets/context'
-import { CONFIRM_CODE, REMOVE_ERRORS } from '../redux/reducers/authReducer'
+import { CONFIRM_CODE, REMOVE_ERRORS, loginThunk } from '../redux/reducers/authReducer'
 
 const ConfirmNumberScreen = ({ navigation }) => {
-    const {COLORS} = useContext(Context)
+    const { COLORS } = useContext(Context)
 
     const dispatch = useDispatch()
     const auth = useSelector(state => state.auth)
-
 
     const [code, setCode] = useState('')
 
@@ -19,24 +18,21 @@ const ConfirmNumberScreen = ({ navigation }) => {
     }, [auth.auth])
 
     useEffect(() => {
-        if(code.length === 6) {
-            dispatch({type: CONFIRM_CODE, payload: +code})
+        if (code.length === 6) {
+            dispatch({ type: CONFIRM_CODE, payload: +code })
+            dispatch(loginThunk({ code: auth.userNumber.code, number: auth.userNumber.number }))
         }
     }, [code])
 
     useEffect(() => {
-        if(auth.errorCode === 1) {
-            Alert.alert(
-                "Ошибка",
-                'Неправильный код',
-                [
-                    {
-                        text: "Ок",
-                        style: "default",
-                        onPress: () => dispatch({type: REMOVE_ERRORS})
-                    },
-                ]
-            )
+        if (auth.errorCode === 1) {
+            Alert.alert('Ошибка', 'Неправильный код', [
+                {
+                    text: 'Ок',
+                    style: 'default',
+                    onPress: () => dispatch({ type: REMOVE_ERRORS }),
+                },
+            ])
         }
     }, [auth.errorCode])
 
@@ -45,21 +41,23 @@ const ConfirmNumberScreen = ({ navigation }) => {
             style={{
                 flex: 1,
                 alignItems: 'center',
-                backgroundColor: COLORS.bgWhite
+                backgroundColor: COLORS.bgWhite,
             }}
         >
             <Text
                 style={{
                     textAlign: 'center',
                     color: COLORS.first,
-                    marginTop: 40
+                    marginTop: 40,
                 }}
-            >Введите код, высланный на {'\n'}ваш телефон</Text>
-            <TextInput 
+            >
+                Введите код, высланный на {'\n'}ваш телефон
+            </Text>
+            <TextInput
                 autoCapitalize="none"
                 keyboardType="number-pad"
-                returnKeyLabel='Готово' 
-                returnKeyType='done'               
+                returnKeyLabel="Готово"
+                returnKeyType="done"
                 textAlign="center"
                 value={code}
                 onChangeText={setCode}
@@ -74,12 +72,10 @@ const ConfirmNumberScreen = ({ navigation }) => {
                     paddingHorizontal: 10,
                     borderRadius: 10,
                     color: COLORS.first,
-                    fontFamily: 'Roboto_400'
+                    fontFamily: 'Roboto_400',
                 }}
             />
-            <TouchableOpacity
-                activeOpacity={0.7}
-            >
+            <TouchableOpacity activeOpacity={0.7}>
                 <View
                     style={{
                         marginTop: 25,
@@ -93,7 +89,7 @@ const ConfirmNumberScreen = ({ navigation }) => {
                         color: COLORS.first,
                         fontFamily: 'Roboto_400',
                         justifyContent: 'center',
-                        alignItems: 'center'
+                        alignItems: 'center',
                     }}
                 >
                     <Text>Отправить код повторно</Text>
