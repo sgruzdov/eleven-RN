@@ -7,7 +7,7 @@ import { Context } from '../assets/context'
 
 const PromoScreen = () => {
     const { COLORS, PADDING_HORIZONTAL } = useContext(Context)
-    const user = useSelector(state => state.auth.user)
+    const user = useSelector(state => state.user.data)
 
     return (
         <SafeAreaView

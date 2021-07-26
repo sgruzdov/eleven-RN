@@ -14,6 +14,8 @@ import ProfileScreen from './ProfileScreen'
 import InstructionScreen from './InstructionScreen'
 import ScanQRScreen from './ScanQRScreen'
 import ProfileChangeScreen from './ProfileChangeScreen'
+import PaymentScreen from './PaymentScreen'
+import AddCardScreen from './AddCardScreen'
 
 const Stack = createStackNavigator()
 
@@ -109,6 +111,22 @@ const StartScreen = () => {
                         }}
                         name="ProfileChange"
                         component={ProfileChangeScreen}
+                    />
+                    <Stack.Screen
+                        options={{
+                            title: 'Оплата',
+                            headerBackTitleVisible: false,
+                        }}
+                        name="Payment"
+                        component={PaymentScreen}
+                    />
+                    <Stack.Screen
+                        options={{
+                            title: 'Добавление карты',
+                            headerBackTitleVisible: false,
+                        }}
+                        name="AddCard"
+                        component={AddCardScreen}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

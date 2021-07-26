@@ -5,7 +5,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { Context } from '../assets/context'
-import { getUserThunk } from '../redux/reducers/authReducer'
+import { getUserThunk } from '../redux/reducers/userReducer'
 
 import PromoScreen from './PromoScreen'
 import MapScreen from './MapScreen'
@@ -17,7 +17,7 @@ const DrawerContent = ({ navigation }) => {
 
     const dispatch = useDispatch()
     const location = useSelector(state => state.settings.location)
-    const user = useSelector(state => state.auth.user)
+    const user = useSelector(state => state.user.data)
 
     const menuData = [
         {

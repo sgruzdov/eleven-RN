@@ -8,7 +8,6 @@ export const CONFIRM_CODE = 'CONFIRM_CODE'
 export const REMOVE_ERRORS = 'REMOVE_ERRORS'
 export const ADD_ERROR = 'ADD_ERROR'
 export const SET_USER_NUMBER = 'SET_USER_NUMBER'
-export const SET_USER = 'SET_USER'
 
 import { URL } from '../../assets/config'
 
@@ -20,7 +19,6 @@ const inittialState = {
         number: null,
     },
     errorCode: 0,
-    user: {},
 }
 
 const getRandomIntInclusive = (min, max) => {
@@ -48,10 +46,6 @@ export const authReducer = (state = inittialState, action) => {
             return produce(state, draft => {
                 draft.userNumber.code = action.payload.numberCode
                 draft.userNumber.number = action.payload.number
-            })
-        case SET_USER:
-            return produce(state, draft => {
-                draft.user = action.payload
             })
         case ADD_ERROR:
             return produce(state, draft => {
@@ -86,32 +80,6 @@ export const loginThunk = userNumber => async dispatch => {
     dispatch({ type: LOADING, payload: true })
     try {
         const user = await axios.post(`${URL}/auth/login`, userNumber)
-    } catch (errors) {
-        console.log('AUTH', errors)
-        dispatch({ type: ADD_ERROR, payload: 3 })
-    }
-
-    dispatch({ type: LOADING, payload: false })
-}
-
-export const getUserThunk = username => async dispatch => {
-    dispatch({ type: LOADING, payload: true })
-    try {
-        const user = await axios.get(`${URL}/auth/getUser?username=${username}`)
-        dispatch({ type: SET_USER, payload: user.data })
-    } catch (errors) {
-        console.log('AUTH', errors)
-        dispatch({ type: ADD_ERROR, payload: 3 })
-    }
-
-    dispatch({ type: LOADING, payload: false })
-}
-
-export const changeUserSettings = data => async dispatch => {
-    dispatch({ type: LOADING, payload: true })
-    try {
-        const result = await axios.patch(`${URL}/auth/changeUserSettings`, data)
-        dispatch({ type: SET_USER, payload: result.data })
     } catch (errors) {
         console.log('AUTH', errors)
         dispatch({ type: ADD_ERROR, payload: 3 })

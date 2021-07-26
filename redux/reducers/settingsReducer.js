@@ -11,12 +11,12 @@ const inittialState = {
         status: 'denied',
         position: false,
         latitude: 53.90098176536905,
-        longitude: 27.559314526339616
-    }
+        longitude: 27.559314526339616,
+    },
 }
 
 export const settingsReducer = (state = inittialState, action) => {
-    switch(action.type) {
+    switch (action.type) {
         case LOADING:
             return produce(state, draft => {
                 draft.loading = action.payload
@@ -31,7 +31,7 @@ export const settingsReducer = (state = inittialState, action) => {
                 draft.location.longitude = action.payload.longitude
                 draft.location.position = true
             })
-        default: 
+        default:
             return state
     }
 }

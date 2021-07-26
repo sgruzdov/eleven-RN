@@ -13,12 +13,12 @@ import { useSelector, useDispatch } from 'react-redux'
 import Svg, { Path } from 'react-native-svg'
 
 import { Context } from '../assets/context'
-import { changeUserSettings } from '../redux/reducers/authReducer'
+import { changeUserSettingsThunk } from '../redux/reducers/userReducer'
 import ModalCodeNumber from '../components/ModalCodeNumber'
 
 const ProfileChangeScreen = () => {
     const { COLORS, PADDING_HORIZONTAL } = useContext(Context)
-    const user = useSelector(state => state.auth.user)
+    const user = useSelector(state => state.user.data)
     const dispatch = useDispatch()
 
     const [userInput, setUserInput] = useState(() => {
@@ -48,7 +48,7 @@ const ProfileChangeScreen = () => {
         } else {
             if (user.username === `${numberCode}${userInput.number}`) {
                 dispatch(
-                    changeUserSettings({
+                    changeUserSettingsThunk({
                         firstName: userInput.firstName,
                         lastName: userInput.lastName,
                         email: userInput.email,
@@ -57,7 +57,7 @@ const ProfileChangeScreen = () => {
                 )
             } else {
                 dispatch(
-                    changeUserSettings({
+                    changeUserSettingsThunk({
                         firstName: userInput.firstName,
                         lastName: userInput.lastName,
                         email: userInput.email,
