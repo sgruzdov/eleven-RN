@@ -106,7 +106,7 @@ const DrawerContent = ({ navigation }) => {
                 </Svg>
             ),
             name: 'Правила парковки',
-            href: 'Instruction',
+            href: 'Course',
         },
     ]
 

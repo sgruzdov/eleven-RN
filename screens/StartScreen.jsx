@@ -16,6 +16,9 @@ import ScanQRScreen from './ScanQRScreen'
 import ProfileChangeScreen from './ProfileChangeScreen'
 import PaymentScreen from './PaymentScreen'
 import AddCardScreen from './AddCardScreen'
+import HistoryScreen from './HistoryScreen'
+import HelpScreen from './HelpScreen'
+import CourseScreen from './CourseScreen'
 
 const Stack = createStackNavigator()
 
@@ -53,7 +56,7 @@ const StartScreen = () => {
                         options={{
                             title: 'Главная',
                             headerShown: false,
-                            animationEnabled: false,
+                            swipeEnabled: true,
                         }}
                     />
                     <Stack.Screen
@@ -92,7 +95,7 @@ const StartScreen = () => {
                     <Stack.Screen
                         options={{
                             headerShown: false,
-                            animationEnabled: false,
+                            swipeEnabled: true,
                         }}
                         name="Instruction"
                         component={InstructionScreen}
@@ -127,6 +130,33 @@ const StartScreen = () => {
                         }}
                         name="AddCard"
                         component={AddCardScreen}
+                    />
+                    <Stack.Screen
+                        options={{
+                            title: 'История поездок',
+                            headerBackTitleVisible: false,
+                        }}
+                        name="History"
+                        component={HistoryScreen}
+                    />
+                    <Stack.Screen
+                        options={{
+                            title: 'Помощь',
+                            headerBackTitleVisible: false,
+                        }}
+                        name="Help"
+                        component={HelpScreen}
+                    />
+                    <Stack.Screen
+                        options={{
+                            title: 'Курс парковки',
+                            headerBackTitleVisible: false,
+                            headerTitleStyle: {
+                                opacity: 0,
+                            },
+                        }}
+                        name="Course"
+                        component={CourseScreen}
                     />
                 </Stack.Navigator>
             </NavigationContainer>
