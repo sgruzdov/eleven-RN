@@ -15,6 +15,7 @@ import Svg, { Path } from 'react-native-svg'
 import { Context } from '../assets/context'
 import { changeUserSettingsThunk } from '../redux/reducers/userReducer'
 import ModalCodeNumber from '../components/ModalCodeNumber'
+import Button from '../components/Button'
 
 const ProfileChangeScreen = () => {
     const { COLORS, PADDING_HORIZONTAL } = useContext(Context)
@@ -340,38 +341,18 @@ const ProfileChangeScreen = () => {
                         alignItems: 'center',
                     }}
                 >
-                    <View
-                        style={{
-                            width: 160,
-                            borderRadius: 50,
-                            backgroundColor: COLORS.orange,
-                            marginVertical: 25,
-                            paddingHorizontal: 20,
-                            ...COLORS.buttonShadow,
-                        }}
-                    >
-                        <TouchableOpacity
-                            onPress={handleClick}
-                            activeOpacity={0.7}
+                    <Button onPress={handleClick} viewStyle={{ width: 160, height: 48 }}>
+                        <Text
                             style={{
-                                height: 48,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'center',
+                                fontFamily: 'Roboto_500',
+                                fontSize: 18,
+                                color: COLORS.first,
+                                marginLeft: 10,
                             }}
                         >
-                            <Text
-                                style={{
-                                    fontFamily: 'Roboto_500',
-                                    fontSize: 18,
-                                    color: COLORS.first,
-                                    marginLeft: 10,
-                                }}
-                            >
-                                Сохранить
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
+                            Сохранить
+                        </Text>
+                    </Button>
                 </View>
             </ScrollView>
             <ModalCodeNumber modal={modal} setModal={setModal} setNumberCode={setNumberCode} />

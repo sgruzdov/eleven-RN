@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import { Context } from '../assets/context'
 import ScreenWrapper from '../components/ScreenWrapper'
+import Button from '../components/Button'
 
 const HelpScreen = () => {
     const { COLORS, PADDING_HORIZONTAL } = useContext(Context)
@@ -25,82 +26,39 @@ const HelpScreen = () => {
                     flexDirection: 'row',
                 }}
             >
-                <View
-                    style={{
-                        borderRadius: 50,
-                        backgroundColor: COLORS.orange,
-                        paddingHorizontal: 20,
-                        flex: 1,
-                        marginRight: 10,
-                    }}
-                >
-                    <TouchableOpacity
-                        // onPress={() => navigation.navigate('ScanQR')}
-                        activeOpacity={0.7}
+                <Button viewStyle={{ marginVertical: 0, flex: 1, height: 40, marginRight: 10 }}>
+                    <Text
                         style={{
-                            height: 40,
-                            alignItems: 'center',
-                            justifyContent: 'center',
+                            fontFamily: 'Roboto_500',
+                            color: COLORS.firstLight,
                         }}
                     >
-                        <Text
-                            style={{
-                                fontFamily: 'Roboto_500',
-                                // fontSize: 16,
-                                color: COLORS.firstLight,
-                            }}
-                        >
-                            Заказать звонок
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-                <View
-                    style={{
-                        borderRadius: 50,
-                        backgroundColor: COLORS.orange,
-                        paddingHorizontal: 20,
-                        flex: 1,
-                    }}
-                >
-                    <TouchableOpacity
-                        // onPress={() => navigation.navigate('ScanQR')}
-                        activeOpacity={0.7}
+                        Заказать звонок
+                    </Text>
+                </Button>
+                <Button viewStyle={{ marginVertical: 0, flex: 1, height: 40 }}>
+                    <Text
                         style={{
-                            height: 40,
-                            alignItems: 'center',
-                            justifyContent: 'center',
+                            fontFamily: 'Roboto_500',
+                            color: COLORS.firstLight,
                         }}
                     >
-                        <Text
-                            style={{
-                                fontFamily: 'Roboto_500',
-                                color: COLORS.firstLight,
-                            }}
-                        >
-                            Открыть чат
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                        Открыть чат
+                    </Text>
+                </Button>
             </View>
-            <View
-                style={{
+            <Button
+                viewStyle={{
                     borderColor: COLORS.borderColor,
                     borderWidth: 1,
-                    borderRadius: 50,
+                    backgroundColor: '#fff',
+                    marginVertical: 0,
                     marginTop: 15,
+                    height: 50,
                 }}
             >
-                <TouchableOpacity
-                    activeOpacity={0.7}
-                    style={{
-                        height: 48,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                >
-                    <Text>FAQ</Text>
-                </TouchableOpacity>
-            </View>
+                <Text>FAQ</Text>
+            </Button>
             <Text
                 style={{
                     color: COLORS.firstLight,

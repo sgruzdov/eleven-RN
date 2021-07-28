@@ -1,16 +1,9 @@
-import React, { useContext, useState } from 'react'
-import {
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    View,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    Modal,
-    Image,
-} from 'react-native'
+import React, { useContext } from 'react'
+import { ScrollView, Text, View, TouchableOpacity, TouchableWithoutFeedback, Modal, Image } from 'react-native'
 import { BlurView } from 'expo-blur'
+
+import { Context } from '../assets/context'
+import Button from './Button'
 
 const numberCodes = [
     {
@@ -34,10 +27,9 @@ const numberCodes = [
         code: '+380',
     },
 ]
-import { Context } from '../assets/context'
 
 const ModalCodeNumber = ({ modal, setModal, setNumberCode }) => {
-    const { COLORS, PADDING_HORIZONTAL, windowWidth, windowHeight } = useContext(Context)
+    const { COLORS, windowWidth } = useContext(Context)
 
     return (
         <Modal visible={modal} animationType="slide" transparent={true}>
@@ -108,21 +100,12 @@ const ModalCodeNumber = ({ modal, setModal, setNumberCode }) => {
                         </TouchableWithoutFeedback>
                     ))}
                 </ScrollView>
-                <TouchableOpacity
-                    activeOpacity={0.7}
+                <Button
                     onPress={() => setModal(false)}
-                    style={{
-                        width: windowWidth - 60,
-                        height: 40,
-                        backgroundColor: COLORS.orange,
-                        borderRadius: 30,
-                        marginTop: 15,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
+                    viewStyle={{ width: windowWidth - 60, height: 40, marginVertical: 0, marginTop: 15 }}
                 >
                     <Text style={{ color: COLORS.first }}>Отмена</Text>
-                </TouchableOpacity>
+                </Button>
             </BlurView>
         </Modal>
     )

@@ -21,6 +21,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { Context } from '../assets/context'
 import { confirmCodeThunk, REMOVE_ERRORS } from '../redux/reducers/authReducer'
 import ModalCodeNumber from '../components/ModalCodeNumber'
+import Button from '../components/Button'
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true)
@@ -182,32 +183,25 @@ const SignScreen = ({ navigation }) => {
                         подтверждаю, что мне исполнилось 18 лет
                     </Text>
                 </View>
-                <TouchableOpacity
-                    activeOpacity={0.7}
+                <Button
                     disabled={radioButton && number.length > 0 ? false : true}
                     onPress={handleSubmit}
+                    viewStyle={{
+                        backgroundColor: radioButton && number.length > 0 ? COLORS.orange : COLORS.buttonDisabled,
+                        marginTop: 40,
+                        width: 200,
+                        height: 50,
+                    }}
                 >
-                    <View
+                    <Text
                         style={{
-                            width: 200,
-                            height: 50,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            borderRadius: 50,
-                            backgroundColor: radioButton && number.length > 0 ? COLORS.orange : COLORS.buttonDisabled,
-                            marginTop: 40,
+                            fontSize: 16,
+                            color: radioButton && number.length > 0 ? COLORS.first : COLORS.firstLight,
                         }}
                     >
-                        <Text
-                            style={{
-                                fontSize: 16,
-                                color: radioButton && number.length > 0 ? COLORS.first : COLORS.firstLight,
-                            }}
-                        >
-                            Войти
-                        </Text>
-                    </View>
-                </TouchableOpacity>
+                        Войти
+                    </Text>
+                </Button>
             </View>
             <ModalCodeNumber modal={modal} setModal={setModal} setNumberCode={setNumberCode} />
         </SafeAreaView>

@@ -2,9 +2,10 @@ import React, { useContext } from 'react'
 import { SafeAreaView, Text, View, Image, TouchableOpacity, Linking } from 'react-native'
 
 import { Context } from '../assets/context'
+import Button from '../components/Button'
 
 const CourseScreen = () => {
-    const { COLORS, PADDING_HORIZONTAL, windowWidth } = useContext(Context)
+    const { COLORS, windowWidth } = useContext(Context)
 
     return (
         <SafeAreaView
@@ -61,34 +62,19 @@ const CourseScreen = () => {
                     alignItems: 'center',
                 }}
             >
-                <View
-                    style={{
-                        borderRadius: 50,
-                        backgroundColor: COLORS.orange,
-                        paddingHorizontal: 20,
-                        marginBottom: 35,
-                        width: 200,
-                    }}
+                <Button
+                    onPress={() => Linking.openURL('https://eleven.city/test/?utm_source=app')}
+                    viewStyle={{ marginVertical: 0, marginBottom: 35, width: 200, height: 50 }}
                 >
-                    <TouchableOpacity
-                        onPress={() => Linking.openURL('https://eleven.city/test/?utm_source=app')}
-                        activeOpacity={0.7}
+                    <Text
                         style={{
-                            height: 50,
-                            alignItems: 'center',
-                            justifyContent: 'center',
+                            fontFamily: 'Roboto_500',
+                            color: COLORS.first,
                         }}
                     >
-                        <Text
-                            style={{
-                                fontFamily: 'Roboto_500',
-                                color: COLORS.first,
-                            }}
-                        >
-                            Пройти
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                        Пройти
+                    </Text>
+                </Button>
             </View>
         </SafeAreaView>
     )

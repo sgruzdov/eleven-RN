@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { Context } from '../assets/context'
 import { CONFIRM_CODE, REMOVE_ERRORS, loginThunk } from '../redux/reducers/authReducer'
+import Button from '../components/Button'
 
 const ConfirmNumberScreen = ({ navigation }) => {
     const { COLORS } = useContext(Context)
@@ -75,26 +76,19 @@ const ConfirmNumberScreen = ({ navigation }) => {
                     fontFamily: 'Roboto_400',
                 }}
             />
-            <TouchableOpacity activeOpacity={0.7}>
-                <View
-                    style={{
-                        marginTop: 25,
-                        width: 200,
-                        height: 50,
-                        borderWidth: 1,
-                        borderColor: COLORS.borderColor,
-                        fontSize: 16,
-                        paddingHorizontal: 10,
-                        borderRadius: 50,
-                        color: COLORS.first,
-                        fontFamily: 'Roboto_400',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}
-                >
-                    <Text>Отправить код повторно</Text>
-                </View>
-            </TouchableOpacity>
+            <Button
+                viewStyle={{
+                    marginTop: 25,
+                    width: 200,
+                    height: 48,
+                    borderWidth: 1,
+                    borderColor: COLORS.borderColor,
+                    paddingHorizontal: 10,
+                    backgroundColor: '#fff',
+                }}
+            >
+                <Text>Отправить код повторно</Text>
+            </Button>
         </View>
     )
 }

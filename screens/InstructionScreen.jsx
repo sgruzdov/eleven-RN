@@ -2,6 +2,7 @@ import React, { useContext, useRef, useState } from 'react'
 import { FlatList, Image, SafeAreaView, Text, View, TouchableOpacity } from 'react-native'
 
 import { Context } from '../assets/context'
+import Button from '../components/Button'
 
 const DATA = [
     {
@@ -152,34 +153,19 @@ const InstructionScreen = ({ navigation }) => {
                     alignItems: 'center',
                 }}
             >
-                <View
-                    style={{
-                        borderRadius: 50,
-                        backgroundColor: COLORS.orange,
-                        paddingHorizontal: 20,
-                        marginBottom: 15,
-                        width: 200,
-                    }}
+                <Button
+                    onPress={handleClickNext}
+                    viewStyle={{ marginVertical: 0, marginBottom: 15, width: 200, height: 50 }}
                 >
-                    <TouchableOpacity
-                        onPress={handleClickNext}
-                        activeOpacity={0.7}
+                    <Text
                         style={{
-                            height: 50,
-                            alignItems: 'center',
-                            justifyContent: 'center',
+                            fontFamily: 'Roboto_500',
+                            color: COLORS.first,
                         }}
                     >
-                        <Text
-                            style={{
-                                fontFamily: 'Roboto_500',
-                                color: COLORS.first,
-                            }}
-                        >
-                            {currentIndex === DATA.length - 1 ? 'Завершить' : 'Продолжить'}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                        {currentIndex === DATA.length - 1 ? 'Завершить' : 'Продолжить'}
+                    </Text>
+                </Button>
             </View>
         </SafeAreaView>
     )
