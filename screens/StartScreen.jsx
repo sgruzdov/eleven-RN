@@ -19,6 +19,7 @@ import AddCardScreen from './AddCardScreen'
 import HistoryScreen from './HistoryScreen'
 import HelpScreen from './HelpScreen'
 import CourseScreen from './CourseScreen'
+import SertificatesScreen from './SertificatesScreen'
 
 const Stack = createStackNavigator()
 
@@ -130,6 +131,14 @@ const StartScreen = () => {
                         }}
                         name="AddCard"
                         component={AddCardScreen}
+                    />
+                    <Stack.Screen
+                        options={{
+                            title: 'Сертификаты',
+                            headerBackTitleVisible: false,
+                        }}
+                        name="Sertificates"
+                        component={SertificatesScreen}
                     />
                     <Stack.Screen
                         options={{

@@ -70,7 +70,7 @@ const DrawerContent = ({ navigation }) => {
                 </Svg>
             ),
             name: 'Сертификаты',
-            href: 'Sertificate',
+            href: 'Sertificates',
         },
         {
             icon: (
